@@ -5,20 +5,16 @@ Runs a server at `localhost:5000` (or SERVER_PORT env) that allows you to contro
 ## Usage
 
 In your environment, set the following values:
+
+| Key | Value |
 | --- | --- |
 | DISCORD_CLIENT_ID | Client ID of your [Discord Application](https://discord.com/developers/applications) |
-| --- | --- |
 | DISCORD_CLIENT_SECRET | Client secret of the Discord Application |
-| --- | --- |
 | NANOLEAF_IP_ADDRESS | Local IP address of your Nanoleaf device, e.g. `192.168.1.3:16021` (default port) |
-| --- | --- |
 | NANOLEAF_AUTH_TOKEN | Auth token received from authenticating via [Nanoleaf REST API](https://documenter.getpostman.com/view/1559645/RW1gEcCH#edd41442-c94f-49dc-977b-8180be92e018) |
-| --- | --- |
-
 | SESSION_SECRET | Secret for express session |
-| --- | --- |
 | SERVER_PORT | Express server port (default `5000`) |
-| --- | --- |
+
 
 Run the server and access the page, then press log in. 
 
