@@ -38,9 +38,6 @@ let isLoggedIn = false;
 module.exports.login = ({
     accessToken
 }) => {
-    if (isLoggedIn) {
-        return true;
-    }
     return rpc
         .login({ 
             clientId, 
@@ -52,7 +49,9 @@ module.exports.login = ({
         })
         .catch(e => {
             console.error('Discord login error', e);
-            throw e;
+            if (!isLoggedIn) {
+                throw e;
+            }
         });
 }
 
