@@ -1,14 +1,17 @@
-import logo from './logo.svg';
 import './App.css';
-import { login, useConnected } from './hooks/discord';
+import Discord from './components/Discord/Discord';
+import { useContext } from 'react';
+import { DiscordContext } from './context/Discord';
 
 function App() {
-  const isConnected = useConnected();
+  const {isConnected, isLoggedIn, login} = useContext(DiscordContext);
+  console.log(':::', {isLoggedIn, login});
 
   return (
     <div className="App">
-      <p>Discord {isConnected ? 'connected' : 'disconnected'}</p>
+      <p>Discord {isLoggedIn ? 'connected' : 'disconnected'}</p>
       {!isConnected && <button onClick={login}>Connect</button>}
+      {isConnected && <Discord/>}
     </div>
   );
 }

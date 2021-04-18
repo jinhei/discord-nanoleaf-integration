@@ -1,5 +1,12 @@
 .App {
   text-align: center;
+  background-color: grey;
+}
+
+.App code {
+  text-align: start;
+  white-space: pre;
+  display: block;
 }
 
 .App-logo {
