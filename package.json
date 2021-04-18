@@ -2,26 +2,31 @@
   "name": "discord-nanoleaf",
   "version": "0.1.0",
   "private": true,
+  "scripts": {
+    "electron": "npx electron main.js",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject",
+    "dev-react": "react-scripts start",
+    "dev-electron": "NODE_ENV=development npm run electron",
+    "dev": "concurrently 'npm run dev-react' 'npm run dev-electron'",
+    "start": "npm run electron"
+  },
   "dependencies": {
-    "@testing-library/jest-dom": "^5.11.10",
-    "@testing-library/react": "^11.2.6",
-    "@testing-library/user-event": "^12.8.3",
+    "axios": "^0.21.1",
+    "discord-rpc": "^3.2.0",
+    "electron": "^12.0.4",
+    "lodash": "^4.17.21",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-scripts": "4.0.3",
     "web-vitals": "^1.1.1"
   },
-  "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
-  },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
+  "devDependencies": {
+    "@testing-library/jest-dom": "^5.11.10",
+    "@testing-library/react": "^11.2.6",
+    "@testing-library/user-event": "^12.8.3",
+    "concurrently": "^6.0.2"
   },
   "browserslist": {
     "production": [
