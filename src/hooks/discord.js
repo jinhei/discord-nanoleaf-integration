@@ -126,7 +126,7 @@ export function useVoiceSettings(channelId, rpc) {
   return voiceSettings;
 }
 
-export function useVoiceState(channelId, rpc) {
+export function useVoiceState(user, channelId, rpc) {
   // voice state
   const [voiceState, setVoiceState] = useState();
   const voiceStateUnsubscribeRef = useRef(null);
@@ -141,12 +141,21 @@ export function useVoiceState(channelId, rpc) {
     rpcUnsubscribe();
     if (channelId) {
       logger.log('Subscribe: VOICE_STATE_UPDATE');
+      if (!voiceState) {
+        rpc.request(RPCCommands.GET_CHANNEL, { channel_id: channelId })
+          .then((data) => {
+            console.log('GET_CHANNEL', data);
+            setVoiceState(data.voice_states.find((s) => s.user.id === user.id).voice_state);
+          });
+      }
       rpc.subscribe(
         RPCEvents.VOICE_STATE_UPDATE,
         { channel_id: channelId },
         (data) => {
           console.log('VOICE_STATE_UPDATE', data);
-          setVoiceState(data);
+          if (data.user.id === user.id) {
+            setVoiceState(data.voice_state);
+          }
         },
       )
         .then(({ unsubscribe }) => {
@@ -154,7 +163,7 @@ export function useVoiceState(channelId, rpc) {
         });
     }
     return () => rpcUnsubscribe();
-  }, [rpc, channelId, rpcUnsubscribe]);
+  }, [rpc, user, voiceState, channelId, rpcUnsubscribe]);
 
   return voiceState;
 }

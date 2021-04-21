@@ -9,7 +9,7 @@ import { useConnected, useGuilds, useUser, useVoiceChannelId, useVoiceSettings, 
 // require from electron to access nodejs 'net'
 const DiscordRPC = window.require('discord-rpc');
 
-export const DiscordContext = createContext(null);
+export const DiscordContext = createContext({});
 
 DiscordRPC.register(process.env.REACT_APP_DISCORD_CLIENT_ID);
 
@@ -25,7 +25,7 @@ export const DiscordProvider = ({ children }) => {
     user,
     voiceChannelId,
     voiceSettings: useVoiceSettings(voiceChannelId, rpc),
-    voiceState: useVoiceState(voiceChannelId, rpc),
+    voiceState: useVoiceState(user, voiceChannelId, rpc),
     guilds: useGuilds(isLoggedIn, rpc),
   };
   console.log('::: context', value);

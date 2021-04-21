@@ -1,14 +1,11 @@
-import { useContext } from 'react';
-import { DiscordContext } from '../../context/Discord';
+import React from 'react';
+
+import UserCard from './UserCard';
 
 function Discord() {
-  const discordContext = useContext(DiscordContext);
-
   return (
     <div className="discord">
-      {discordContext && <code>
-        {JSON.stringify(discordContext, null, 2)}
-      </code>}
+      <UserCard />
     </div>
   );
 }

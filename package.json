@@ -4,10 +4,10 @@
   "private": true,
   "scripts": {
     "electron": "npx electron main.js",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "dev-react": "react-scripts start",
+    "build": "craco build",
+    "test": "craco test",
+    "dev-react": "craco start",
     "dev-electron": "cross-env NODE_ENV=development npm run electron",
     "dev": "concurrently  \"npm run dev-react\" \"npm run dev-electron\"",
     "start": "npm run electron"
@@ -15,6 +15,7 @@
   "dependencies": {
     "@craco/craco": "^6.1.1",
     "axios": "^0.21.1",
+    "classnames": "^2.3.1",
     "discord-rpc": "git@github.com:Jinhei/RPC.git#bug/subscriptions",
     "electron": "^12.0.4",
     "lodash": "^4.17.21",

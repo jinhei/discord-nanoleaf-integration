@@ -1,6 +1,7 @@
 // Modules to control application life and create native browser window
 const { app, BrowserWindow } = require('electron');
 const path = require('path');
+require('./electron/services');
 
 const REACT_BUILD_DIR = '../build';
 const REACT_WEBPACK_URL = 'http://localhost:3000';

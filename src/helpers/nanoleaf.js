@@ -1,9 +1,9 @@
-const axios = require('axios');
+const axios = window.require('axios');
 
 /**
  * @link https://documenter.getpostman.com/view/1559645/RW1gEcCH#edd41442-c94f-49dc-977b-8180be92e018
  */
-module.exports = class Nanoleaf {
+export default class Nanoleaf {
   constructor({ ipAddress, authToken }) {
     this.axios = axios.create({
       baseURL: `http://${ipAddress}/api/v1/${authToken}`,
@@ -11,7 +11,7 @@ module.exports = class Nanoleaf {
   }
 
   getScenes() {
-    return this.axios.get('/effects/effectsList').then(({ data }) => data);
+    return this.axios.get('/effects/effectsList');
   }
 
   setScene(scene) {
