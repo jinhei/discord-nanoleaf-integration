@@ -1,11 +1,11 @@
 import './App.css';
-import Discord from './components/Discord/Discord';
 import { useContext } from 'react';
+import Discord from './components/Discord/Discord';
 import { DiscordContext } from './context/Discord';
 
 function App() {
-  const {isConnected, isLoggedIn, login} = useContext(DiscordContext);
-  console.log(':::', {isLoggedIn, login});
+  const { isConnected, isLoggedIn, login } = useContext(DiscordContext);
+  console.log(':::', { isLoggedIn, login });
 
   return (
     <div className="App">

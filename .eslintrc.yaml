@@ -1,7 +1,30 @@
 extends:
   - react-app
+  - airbnb-base
+
+ignorePatterns:
+  - node_modules
+  - test
 
 rules:
   semi:
     - warn
     - always
+  linebreak-style:
+    - warn
+    - unix
+  indent:
+    - error
+    - 2
+    - SwitchCase: 1
+      FunctionDeclaration: 
+        parameters: first
+      FunctionExpression:
+        parameters: first
+      CallExpression:
+        arguments: first
+  object-curly-newline: off
+  curly:
+    - error
+    - all
+  function-paren-newline: off

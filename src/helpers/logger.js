@@ -3,7 +3,7 @@ import _ from 'lodash';
 const LOGGING_METHODS = ['group', 'log', 'warn', 'error'];
 
 class Logger {
-  constructor({name}) {
+  constructor({ name }) {
     this.name = name;
 
     const nameTag = this.buildNameTag(name);
@@ -16,7 +16,7 @@ class Logger {
 
   generateHue() {
     let sum = 0;
-    for (let i; i < this.name.length; i++) {
+    for (let i; i < this.name.length; i += 1) {
       sum += this.name.charCodeAt(i);
     }
     return sum % 361;
@@ -27,15 +27,14 @@ class Logger {
     return [
       `%c${name}`,
       [
-        'padding: 2px', 
-        'border-radius: 2px', 
+        'padding: 2px',
+        'border-radius: 2px',
         `background: hsl(${hue}, 100%, 50%),`,
         'font-weight: 600',
       ].join('; '),
       '\n',
     ];
   }
-
 }
 
 export default Logger;
