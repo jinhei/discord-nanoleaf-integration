@@ -3,7 +3,7 @@ const { app, BrowserWindow } = require('electron');
 const path = require('path');
 require('./electron/services');
 
-const REACT_BUILD_DIR = '../build';
+const REACT_BUILD_DIR = './build';
 const REACT_WEBPACK_URL = 'http://localhost:3000';
 
 function createWindow() {
@@ -14,14 +14,15 @@ function createWindow() {
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
+      webSecurity: false,
     },
   });
 
   // and load the page
-  if (process.env.NODE_ENV === 'production') {
-    mainWindow.loadFile(REACT_BUILD_DIR);
-  } else {
+  if (process.env.NODE_ENV === 'development') {
     mainWindow.loadURL(REACT_WEBPACK_URL);
+  } else {
+    mainWindow.loadFile(`${REACT_BUILD_DIR}/index.html`);
   }
 
   // Open the DevTools.
