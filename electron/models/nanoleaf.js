@@ -17,7 +17,8 @@ module.exports = class Nanoleaf {
   setScene(scene) {
     if (this.scene !== scene) {
       this.scene = scene;
-      return this.axios.put('/effects', { select: scene });
+      return this.axios.put('/effects', { select: scene })
+        .then(({ data }) => data);
     }
     return Promise.resolve();
   }

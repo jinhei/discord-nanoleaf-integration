@@ -28,7 +28,6 @@ export const DiscordProvider = ({ children }) => {
     voiceState: useVoiceState(user, voiceChannelId, rpc),
     guilds: useGuilds(isLoggedIn, rpc),
   };
-  console.log('::: context', value);
 
   const { Provider } = DiscordContext;
   return (

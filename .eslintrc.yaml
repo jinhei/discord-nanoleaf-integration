@@ -28,3 +28,5 @@ rules:
     - error
     - all
   function-paren-newline: off
+  no-async-promise-executor: off
+  no-await-in-loop: off

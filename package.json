@@ -54,7 +54,11 @@
   "build": {
     "appId": "com.electron.discord-nanoleaf",
     "extends": null,
+    "directories": {
+      "buildResources": "assets"
+    },
     "files": [
+      "assets/**/*",
       "electron/**/*",
       "build/**/*",
       "main.js"

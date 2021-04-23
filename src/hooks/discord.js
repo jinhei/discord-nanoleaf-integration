@@ -10,6 +10,38 @@ import Logger from '../helpers/logger';
 
 const logger = new Logger({ name: 'discord' });
 
+const wait = (ms) => new Promise((res) => setTimeout(res, ms));
+
+/**
+ * Retry RPC fn until it resolves, since it's sometimes just "lost"
+ * @param {fuction} fn rpc.subscribe or rpc.command
+ * @param  {...any} args
+ * @returns {Promise}
+ */
+const withRetry = (rpc, method, ...args) => new Promise(async (res, rej) => {
+  let hasResolved = false;
+  let tries = 0;
+  const makeRequest = () => rpc[method](...args)
+    .then((data) => {
+      logger.log(method, 'resolve', { args, data });
+      hasResolved = true;
+      res(data);
+    })
+    .catch((e) => {
+      hasResolved = true;
+      rej(e);
+    });
+  makeRequest();
+  while (!hasResolved) {
+    await wait(3000);
+    if (!hasResolved) {
+      tries += 1;
+      logger.log(method, 'retry', { args, tries });
+      makeRequest();
+    }
+  }
+});
+
 export function useConnected(rpc) {
   const [isConnected, setConnected] = useState();
   useEffect(() => {
@@ -61,24 +93,16 @@ export function useVoiceChannelId(isLoggedIn, rpc) {
 
   useEffect(() => {
     if (isLoggedIn) {
-      rpc.request(RPCCommands.GET_SELECTED_VOICE_CHANNEL)
+      withRetry(rpc, 'request', RPCCommands.GET_SELECTED_VOICE_CHANNEL)
         .then((data) => {
-          logger.log('::::: GET_SELECTED_VOICE_CHANNEL', data);
           setChannelId((data && (data.id || data.channel_id)) || null);
-        })
-        .catch((e) => console.log('::::: e', e));
+        });
 
-      logger.log('Subscribe: VOICE_CHANNEL_SELECT');
-      rpc.subscribe(RPCEvents.VOICE_CHANNEL_SELECT, (data) => {
-        logger.log('VOICE_CHANNEL_SELECT', data);
+      withRetry(rpc, 'subscribe', RPCEvents.VOICE_CHANNEL_SELECT, (data) => {
         setChannelId(data.channel_id || null);
-      })
-        .then((data) => {
-          logger.log('VOICE_CHANNEL_SELECT subscribe success', data);
-        })
-        .catch((e) => console.log('::::: e', e));
+      });
       // logger.log('Subscribe: CHANNEL_CREATE');
-      // rpc.subscribe(RPCEvents.CHANNEL_CREATE, data => {
+      // withRetry(rpc, 'subscribe', RPCEvents.CHANNEL_CREATE, data => {
       //   logger.log('CHANNEL_CREATE', data);
       //   setChannelId(data.channel_id || null);
       // })
@@ -104,14 +128,17 @@ export function useVoiceSettings(channelId, rpc) {
   useEffect(() => {
     rpcUnsubscribe();
     if (channelId) {
-      rpc.request(
+      withRetry(
+        rpc,
+        'request',
         RPCCommands.GET_VOICE_SETTINGS,
       ).then(setVoiceSettings);
       logger.log('Subscribe: VOICE_SETTINGS_UPDATE');
-      rpc.subscribe(
+      withRetry(
+        rpc,
+        'subscribe',
         RPCEvents.VOICE_SETTINGS_UPDATE,
         (data) => {
-          console.log('VOICE_SETTINGS_UPDATE', data);
           setVoiceSettings(data);
         },
       )
@@ -135,31 +162,31 @@ export function useVoiceState(user, channelId, rpc) {
       logger.log('unsubscribe: VOICE_STATE_UPDATE');
       voiceStateUnsubscribeRef.current();
     }
-  }, [])
+  }, []);
 
   useEffect(() => {
     rpcUnsubscribe();
     if (channelId) {
       logger.log('Subscribe: VOICE_STATE_UPDATE');
       if (!voiceState) {
-        rpc.request(RPCCommands.GET_CHANNEL, { channel_id: channelId })
+        withRetry(rpc, 'request', RPCCommands.GET_CHANNEL, { channel_id: channelId })
           .then((data) => {
-            console.log('GET_CHANNEL', data);
             setVoiceState(data.voice_states.find((s) => s.user.id === user.id).voice_state);
           });
       }
-      rpc.subscribe(
+      withRetry(
+        rpc,
+        'subscribe',
         RPCEvents.VOICE_STATE_UPDATE,
         { channel_id: channelId },
         (data) => {
-          console.log('VOICE_STATE_UPDATE', data);
           if (data.user.id === user.id) {
             setVoiceState(data.voice_state);
           }
         },
       )
         .then(({ unsubscribe }) => {
-          voiceStateUnsubscribeRef.current = unsubscribe
+          voiceStateUnsubscribeRef.current = unsubscribe;
         });
     }
     return () => rpcUnsubscribe();
@@ -173,7 +200,7 @@ export function useGuilds(isLoggedIn, rpc) {
 
   useEffect(() => {
     if (isLoggedIn) {
-      rpc.request(RPCCommands.GET_GUILDS)
+      withRetry(rpc, 'request', RPCCommands.GET_GUILDS)
         .then((data) => setGuilds(data.guilds));
     }
   }, [rpc, isLoggedIn]);
@@ -189,9 +216,9 @@ export function useTextChannelId(guilds, rpc) {
   useEffect(() => {
     if (guilds.length > 0) {
       // TODO: remove hard-coded guild
-      rpc.request(RPCCommands.GET_CHANNELS, { guild_id: guilds.find((g) => g.name === 'test').id })
+      withRetry(rpc, 'request', RPCCommands.GET_CHANNELS, { guild_id: guilds.find((g) => g.name === 'test').id })
         .then(({ channels }) => {
-          setTextChannelId(channels.find((c) => c.type === ChannelTypes.GUILD_TEXT).id)
+          setTextChannelId(channels.find((c) => c.type === ChannelTypes.GUILD_TEXT).id);
         });
     }
   }, [rpc, guilds]);
@@ -205,15 +232,17 @@ export function useMessages(textChannelId, rpc) {
   useEffect(() => {
     if (textChannelId) {
       if (messages.length === 0) {
-        rpc.request(RPCCommands.GET_CHANNEL, { channel_id: textChannelId })
+        withRetry(rpc, 'request', RPCCommands.GET_CHANNEL, { channel_id: textChannelId })
           .then(({ messages: channelMessages }) => {
-            setMessages(channelMessages)
+            setMessages(channelMessages);
           });
       }
       if (messagesUnsubscribeRef.current) {
         messagesUnsubscribeRef.current();
       }
-      rpc.subscribe(
+      withRetry(
+        rpc,
+        'subscribe',
         RPCEvents.MESSAGE_CREATE,
         { channel_id: textChannelId },
         ({ message }) => setMessages([...messages, message]),
