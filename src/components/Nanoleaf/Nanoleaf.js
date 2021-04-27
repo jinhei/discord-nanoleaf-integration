@@ -31,19 +31,24 @@ const Nanoleaf = () => {
   } = useContext(DiscordContext);
   useEffect(() => {
     let scene;
+    let icon;
     if (!voiceChannelId) {
       scene = NANOLEAF_SCENES.NOT_IN_CALL;
+      icon = null;
     } else if (
       voiceSettings.mute
       || voiceSettings.deaf
       || _.get(voiceSettings, 'mode.type') === 'PUSH_TO_TALK'
     ) {
       scene = NANOLEAF_SCENES.MUTED;
+      icon = 'mic_mute';
     } else {
       scene = NANOLEAF_SCENES.NOT_MUTED;
+      icon = 'mic';
     }
     console.log('nanoleaf-setScene', scene)
     ipcRenderer.invoke('nanoleaf-setScene', scene);
+    ipcRenderer.invoke('electron-icon-overlay', icon);
   }, [voiceSettings, voiceChannelId]);
 
   return (
