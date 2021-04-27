@@ -10,9 +10,6 @@ rules:
   semi:
     - warn
     - always
-  linebreak-style:
-    - warn
-    - unix
   indent:
     - error
     - 2
@@ -30,3 +27,4 @@ rules:
   function-paren-newline: off
   no-async-promise-executor: off
   no-await-in-loop: off
+  linebreak-style: off
