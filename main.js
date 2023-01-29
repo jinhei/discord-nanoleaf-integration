@@ -1,18 +1,20 @@
 // Modules to control application life and create native browser window
-const { app, BrowserWindow } = require('electron');
+const { app, BrowserWindow, Tray, Menu } = require('electron');
 const path = require('path');
 require('./electron/services');
 
 const REACT_BUILD_DIR = './build';
 const REACT_WEBPACK_URL = 'http://localhost:3000';
 
+const ICON_PATH = path.join(__dirname, 'assets', 'icon.png');
+
 function createWindow() {
   // Create the browser window.
-  const mainWindow = new BrowserWindow({
+  let mainWindow = new BrowserWindow({
     width: 800,
     height: 600,
     autoHideMenuBar: true,
-    icon: './assets/icon.png',
+    icon: ICON_PATH,
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
@@ -27,8 +29,51 @@ function createWindow() {
     mainWindow.loadFile(`${REACT_BUILD_DIR}/index.html`);
   }
 
+  const createTray = () => {
+    const tray = new Tray(ICON_PATH);
+    const contextMenu = Menu.buildFromTemplate([
+      {
+        label: 'Show App',
+        click: () => mainWindow.show(),
+      },
+      {
+        label: 'Quit',
+        click: () => {
+          app.quit();
+        },
+      },
+    ]);
+    tray.setContextMenu(contextMenu);
+    tray.setToolTip('Discord Nanoleaf');
+    tray.on('double-click', () => {
+      mainWindow.show();
+    });
+    return tray;
+  };
+
+  let tray = null;
+  // Emitted when the window is closed.
+  mainWindow.on('close', () => {
+    mainWindow = null;
+  });
+
+  mainWindow.on('minimize', (e) => {
+    e.preventDefault();
+    mainWindow.hide();
+    tray = createTray();
+  });
+
+  mainWindow.on('show', () => {
+    tray.destroy();
+  });
+
   // Open the DevTools.
-  // mainWindow.webContents.openDevTools()
+  if (process.env.NODE_ENV === 'development') {
+    mainWindow.webContents.openDevTools();
+  } else {
+    mainWindow.hide();
+    tray = createTray();
+  }
 }
 
 // This method will be called when Electron has finished

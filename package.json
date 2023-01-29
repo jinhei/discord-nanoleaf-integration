@@ -1,11 +1,12 @@
 {
   "name": "discord-nanoleaf",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "main": "main.js",
   "scripts": {
     "electron": "npx electron main.js",
     "eject": "react-scripts eject",
+    "build": "npm run build:react && npm run build:electron",
     "build:react": "cross-env PUBLIC_URL=./ craco build",
     "build:electron": "npx electron-builder build",
     "test": "craco test",

@@ -5,7 +5,6 @@ import { DiscordContext } from '../../context/Discord';
 
 const UserCard = () => {
   const { user, login } = useContext(DiscordContext);
-  console.log(':::: discord context 2', user);
 
   let cardContents;
   let onClick;

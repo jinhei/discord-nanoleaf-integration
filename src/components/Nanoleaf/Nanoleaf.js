@@ -6,30 +6,59 @@ import { DiscordContext } from '../../context/Discord';
 
 const { ipcRenderer } = window.require('electron');
 
-// TODO: make these selectable
+const LOCALSTORAGE_KEYS = {
+  IP: 'nanoleaf-ip',
+  AUTH_TOKEN: 'nanoleaf-authtoken',
+  NOT_IN_CALL: 'scene-not-in-call',
+  NOT_MUTED: 'scene-not-muted',
+  MUTED: 'scene-muted',
+};
 const NANOLEAF_SCENES = {
-  NOT_IN_CALL: 'Sky Mode',
-  NOT_MUTED: 'Discord',
-  MUTED: 'Meep',
-}
+  NOT_IN_CALL: localStorage.getItem(LOCALSTORAGE_KEYS.NOT_IN_CALL) || 'Sky Mode',
+  NOT_MUTED: localStorage.getItem(LOCALSTORAGE_KEYS.NOT_MUTED) || 'Discord',
+  MUTED: localStorage.getItem(LOCALSTORAGE_KEYS.MUTED) || 'Meep',
+};
 
 const Nanoleaf = () => {
   const [ready, setReady] = useState(false);
   const [scenes, setScenes] = useState([]);
-  const [muteScene, setMuteScene] = useState(NANOLEAF_SCENES.MUTED);
-  const [unmuteScene, setUnmuteScene] = useState(NANOLEAF_SCENES.NOT_MUTED);
-  const [defaultScene, setDefaultScene] = useState(NANOLEAF_SCENES.NOT_IN_CALL);
+  const [muteScene, setMuteSceneState] = useState(NANOLEAF_SCENES.MUTED);
+  const [unmuteScene, setUnmuteSceneState] = useState(NANOLEAF_SCENES.NOT_MUTED);
+  const [defaultScene, setDefaultSceneState] = useState(NANOLEAF_SCENES.NOT_IN_CALL);
+  const [ipAddress, setIp] = useState(
+    localStorage.getItem(LOCALSTORAGE_KEYS.IP)
+    || process.env.REACT_APP_NANOLEAF_IP_ADDRESS,
+  );
+  const [authToken, setAuthToken] = useState(
+    localStorage.getItem(LOCALSTORAGE_KEYS.AUTH_TOKEN)
+    || process.env.REACT_APP_NANOLEAF_AUTH_TOKEN,
+  );
+
+  const setMuteScene = (val) => {
+    localStorage.setItem(LOCALSTORAGE_KEYS.MUTED, val);
+    setMuteSceneState(val);
+  };
+  const setUnmuteScene = (val) => {
+    localStorage.setItem(LOCALSTORAGE_KEYS.NOT_MUTED, val);
+    setUnmuteSceneState(val);
+  }
+  const setDefaultScene = (val) => {
+    localStorage.setItem(LOCALSTORAGE_KEYS.NOT_IN_CALL, val);
+    setDefaultSceneState(val);
+  };
 
   const [selectionFn, setSelectionFn] = useState(null);
-  console.log({ selectionFn, setDefaultScene, muteScene, unmuteScene, defaultScene });
 
   useEffect(() => {
+    localStorage.setItem(LOCALSTORAGE_KEYS.IP, ipAddress);
+    localStorage.setItem(LOCALSTORAGE_KEYS.AUTH_TOKEN, authToken);
+    setReady(false);
     // TODO: allow user to input credentials
     ipcRenderer.invoke('nanoleaf-construct', {
-      ipAddress: process.env.REACT_APP_NANOLEAF_IP_ADDRESS,
-      authToken: process.env.REACT_APP_NANOLEAF_AUTH_TOKEN,
+      ipAddress,
+      authToken,
     }).then(() => setReady(true));
-  }, []);
+  }, [ipAddress, authToken]);
   useEffect(() => {
     ipcRenderer.invoke('nanoleaf-getScenes').then(setScenes)
   }, [ready]);
@@ -54,14 +83,15 @@ const Nanoleaf = () => {
       scene = unmuteScene;
       icon = 'mic';
     }
-    console.log('nanoleaf-setScene', scene)
     ipcRenderer.invoke('nanoleaf-setScene', scene);
     ipcRenderer.invoke('electron-icon-overlay', icon);
   }, [defaultScene, muteScene, unmuteScene, voiceSettings, voiceChannelId]);
 
   return (
-    <div className="bg-green-200">
+    <div>
       <h2>Nanoleaf</h2>
+      <Input label="Nanoleaf IP" onSubmit={(val) => setIp(val)} value={ipAddress} />
+      <Input label="Auth Token" onSubmit={(val) => setAuthToken(val)} value={authToken} />
       <Table>
         <thead>
           <Row>
@@ -99,7 +129,6 @@ const Nanoleaf = () => {
                 key={s}
                 onClick={selectionFn
                   ? () => {
-                    console.log(':::: button click', s)
                     selectionFn(s);
                     setSelectionFn(null);
                   }
@@ -110,6 +139,23 @@ const Nanoleaf = () => {
           </div>
         </div>
       )}
+    </div>
+  )
+}
+
+const Input = ({ label, children, onSubmit, ...props }) => {
+  const [inputVal, setInputVal] = useState(props.value);
+  return (
+    <div className="mb-4">
+      <label className="block text-gray-700 text-sm font-bold mb-2">{label}</label>
+      <div className="flex">
+        <input className="m-1 shadow border rounded w-40 p-2 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+          {...props}
+          value={inputVal}
+          onChange={(e) => setInputVal(e.target.value)}
+        />
+        <Button className="w-20" onClick={() => onSubmit(inputVal)}>Submit</Button>
+      </div>
     </div>
   )
 }
